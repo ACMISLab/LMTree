@@ -1,0 +1,29 @@
+{
+    "dataset_name": "abalone",
+    "type": 0,
+    "num_samples": 4177,
+    "description": "The Abalone dataset is sourced from the Marine Resources Division, Marine Research Laboratories in Tasmania, and was donated by Sam Waugh from the University of Tasmania. It consists of 4177 instances and 9 attributes, aimed at predicting the age of abalone from physical measurements. The dataset is structured with 8 continuous features and 1 nominal feature, with no missing values. The target variable is the number of rings, which can be used to determine the age of the abalone. This dataset is applicable in domains such as marine biology and machine learning, particularly for regression and classification tasks. The data was originally collected for a non-machine-learning study on the population biology of abalone species in Tasmania.",
+    "attribute_introduction": {
+        "Sex": "Nominal attribute indicating the sex of the abalone, with possible values M, F, and I (infant).",
+        "Length": "Continuous attribute representing the longest shell measurement in millimeters.",
+        "Diameter": "Continuous attribute representing the diameter of the shell, perpendicular to the length, in millimeters.",
+        "Height": "Continuous attribute representing the height of the abalone with meat in the shell, in millimeters.",
+        "Whole_weight": "Continuous attribute representing the whole weight of the abalone in grams.",
+        "Shucked_weight": "Continuous attribute representing the weight of the meat in grams.",
+        "Viscera_weight": "Continuous attribute representing the gut weight after bleeding, in grams.",
+        "Shell_weight": "Continuous attribute representing the weight of the shell after being dried, in grams.",
+        "Class_number_of_rings": "Integer attribute representing the number of rings, which is used to predict the age of the abalone by adding 1.5 to the number of rings."
+    },
+    "target": "Class_number_of_rings",
+    "is_categorical": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    ]
+}

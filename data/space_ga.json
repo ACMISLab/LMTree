@@ -1,0 +1,25 @@
+{
+    "dataset_name": "space_ga",
+    "type": 0,
+    "num_samples": 3107,
+    "description": "The dataset, used in the study by Pace and Barry (1997), is a georeferenced spatial dataset containing 3,107 observations on U.S. county votes cast in the 1980 presidential election. It includes data on the total number of votes cast per county, the population aged 18 or older, the population with a 12th grade or higher education, the number of owner-occupied housing units, aggregate income, and spatial coordinates of the counties. The dataset is structured to facilitate the analysis of spatially autoregressive dependent variables.",
+    "attribute_introduction": {
+        "POP": "The population in each county of 18 years of age or older.",
+        "EDUCATION": "The population in each county with a 12th grade or higher education.",
+        "HOUSES": "The number of owner-occupied housing units in each county.",
+        "INCOME": "The aggregate income in each county.",
+        "XCOORD": "The X spatial coordinate of the county.",
+        "YCOORD": "The Y spatial coordinate of the county.",
+        "ln(VOTES/POP)": "The log of the proportion of votes cast for both candidates in the 1980 presidential election, serving as the dependent variable."
+    },
+    "target": "ln(VOTES/POP)",
+    "is_categorical": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    ]
+}

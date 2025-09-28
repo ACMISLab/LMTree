@@ -1,0 +1,31 @@
+{
+    "dataset_name": "black_friday",
+    "type": 0,
+    "num_samples": 166821,
+    "description": "The black_friday dataset is designed for regression tasks, focusing on customer purchases during Black Friday. It provides insights into consumer behavior by analyzing various demographic and product-related features to predict the purchase amount.",
+    "attribute_introduction": {
+        "Gender": "The gender of the customer, indicating whether the customer is male or female.",
+        "Age": "The age range of the customer, categorized into different age groups.",
+        "Occupation": "The occupation code of the customer, representing different job categories.",
+        "City_Category": "The category of the city where the customer resides, indicating urban, semi-urban, or rural areas.",
+        "Stay_In_Current_City_Years": "The number of years the customer has stayed in the current city.",
+        "Marital_Status": "The marital status of the customer, indicating whether the customer is married or not.",
+        "Product_Category_1": "The category code of the first product purchased by the customer.",
+        "Product_Category_2": "The category code of the second product purchased by the customer, if applicable.",
+        "Product_Category_3": "The category code of the third product purchased by the customer, if applicable.",
+        "Purchase": "The purchase amount, which is the target variable to be predicted."
+    },
+    "target": "Purchase",
+    "is_categorical": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+    ]
+}

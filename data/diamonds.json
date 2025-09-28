@@ -1,0 +1,31 @@
+{
+    "dataset_name": "diamonds",
+    "type": 0,
+    "num_samples": 53940,
+    "description": "The diamonds dataset contains information on the prices and various attributes of nearly 54,000 diamonds. It is widely used for data analysis and visualization tasks, particularly in regression analysis. The dataset includes features such as carat, cut, color, clarity, depth, table, x, y, and z, with the target variable being the price of the diamond in US dollars.",
+    "attribute_introduction": {
+        "carat": "Weight of the diamond, ranging from 0.2 to 5.01.",
+        "cut": "Quality of the cut, categorized as Fair, Good, Very Good, Premium, or Ideal.",
+        "color": "Diamond color, graded from J (worst) to D (best).",
+        "clarity": "Measurement of how clear the diamond is, ranging from I1 (worst) to IF (best).",
+        "depth": "Total depth percentage, calculated as 2 * z / (x + y), ranging from 43 to 79.",
+        "table": "Width of the top of the diamond relative to the widest point, ranging from 43 to 95.",
+        "x": "Length of the diamond in mm, ranging from 0 to 10.74.",
+        "y": "Width of the diamond in mm, ranging from 0 to 58.9.",
+        "z": "Depth of the diamond in mm, ranging from 0 to 31.8.",
+        "price": "Price of the diamond in US dollars, ranging from $326 to $18,823."
+    },
+    "target": "price",
+    "is_categorical": [
+        false,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+    ]
+}

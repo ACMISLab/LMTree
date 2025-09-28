@@ -1,0 +1,39 @@
+{
+    "dataset_name": "boston",
+    "type": 0,
+    "num_samples": 506,
+    "description": "The Boston house-price dataset, originally used in the study 'Hedonic prices and the demand for clean air' by Harrison and Rubinfeld, is a classic dataset in the field of regression analysis. It has been utilized in various studies, including 'Regression diagnostics' by Belsley, Kuh, and Welsch. The dataset is structured with numeric features and is intended for regression tasks, specifically to predict the median value of owner-occupied homes in Boston based on various socio-economic and environmental factors.",
+    "attribute_introduction": {
+        "CRIM": "Per capita crime rate by town.",
+        "ZN": "Proportion of residential land zoned for lots over 25,000 sq.ft.",
+        "INDUS": "Proportion of non-retail business acres per town.",
+        "CHAS": "Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).",
+        "NOX": "Nitric oxides concentration (parts per 10 million).",
+        "RM": "Average number of rooms per dwelling.",
+        "AGE": "Proportion of owner-occupied units built prior to 1940.",
+        "DIS": "Weighted distances to five Boston employment centres.",
+        "RAD": "Index of accessibility to radial highways.",
+        "TAX": "Full-value property-tax rate per $10,000.",
+        "PTRATIO": "Pupil-teacher ratio by town.",
+        "B": "1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.",
+        "LSTAT": "% lower status of the population.",
+        "MEDV": "Median value of owner-occupied homes in $1000's. This is the target feature."
+    },
+    "target": "MEDV",
+    "is_categorical": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false
+    ]
+}

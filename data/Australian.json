@@ -1,0 +1,41 @@
+{
+    "dataset_name": "Australian",
+    "type": 1,
+    "num_samples": 690,
+    "description": "The Australian Credit Approval dataset, originating from the StatLog project, is a well-known dataset concerning credit card applications. It was sourced from the UCI Machine Learning Repository and LibSVM, with its initial release in 1987. The dataset has been modified to fill in missing values and remove a duplicate feature, with all attribute names and values anonymized to protect confidentiality. The dataset is structured with 6 numerical and 8 categorical attributes, all normalized to the range [-1,1]. It is intended for classification tasks, specifically to determine credit approval outcomes.",
+    "attribute_introduction": {
+        "A1": "A categorical attribute with values 0,1.",
+        "A2": "A continuous attribute.",
+        "A3": "A continuous attribute.",
+        "A4": "A categorical attribute with values 1,2,3.",
+        "A5": "A categorical attribute with values 1 to 14.",
+        "A6": "A categorical attribute with values 1 to 9.",
+        "A7": "A continuous attribute.",
+        "A8": "A categorical attribute with values 1,0.",
+        "A9": "A categorical attribute with values 1,0.",
+        "A10": "A continuous attribute.",
+        "A11": "A categorical attribute with values 1,0.",
+        "A12": "A categorical attribute with values 1,2,3.",
+        "A13": "A continuous attribute.",
+        "A14": "A continuous attribute.",
+        "A15": "The class attribute for classification with values 1,2."
+    },
+    "target": "A15",
+    "is_categorical": [
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false,
+        true
+    ]
+}
