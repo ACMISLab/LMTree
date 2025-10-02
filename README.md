@@ -6,7 +6,7 @@ GLMTree is an automated feature engineering framework that leverages Large Langu
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/ACMISLab/GLMTree.git
+git clone https://github.com/ACMISLab/LMTree.git
 cd GLMTree
 ```
 
