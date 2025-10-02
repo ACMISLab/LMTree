@@ -101,7 +101,7 @@ print("Feature engineering completed, generated dataset:", result_data.columns.t
 ```
 LMTree/
 ├── LMTree/
-│   ├── method/          # Core algorithms
+│   ├── method/         # Core algorithms
 │   ├── conf/           # Configuration files
 │   └── llm/            # LLM integration utilities
 ├── data/               # Sample datasets
