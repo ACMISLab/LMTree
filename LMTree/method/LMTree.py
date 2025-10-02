@@ -782,7 +782,6 @@ In addition to the original feature attributes of the dataset, the following are
         """Main execution method for iterative feature construction."""
         self.temp_time = 1
         self.histroy_evaluate_result = []
-        detail_feature_performance_metrics = []
         self.best_score = 0
         self.best_featureNameList = []
         self.FeatureData = self.X
@@ -801,7 +800,6 @@ In addition to the original feature attributes of the dataset, the following are
 
         self.BestFeatureCombination()
         self.FeatureData[self.target_column_name] = self.Y
-        finallFeatureDict = self.init_column_feature | self.FeatureLibrary.extract_feature_scores_dict()
         end_time = time.time()
         self.elapsed_time = end_time - self.initTime
 
