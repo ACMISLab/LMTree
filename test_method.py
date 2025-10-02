@@ -6,7 +6,7 @@ from sklearn.metrics import accuracy_score, roc_auc_score, r2_score
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier, XGBRegressor
 
-from GLMTree.method.GLMTree import GLMTree
+from LMTree.method.LMTree import LMTree
 
 dataName = "Australian" # or "Australian" or "abalone"....
 
@@ -122,8 +122,8 @@ train, test = train_test_split(df_loaded, test_size=train_test_split_size, rando
 Data = pd.concat([train, test])
 Data = Data.sort_index()
 
-# Initialize and run GLMTree
-GLMT = GLMTree(Data, target, dataName, attribute_introduction, is_categorical, taskType=taskType,
+# Initialize and run LMTree
+GLMT = LMTree(Data, target, dataName, attribute_introduction, is_categorical, taskType=taskType,
                content_desc=description)
 NewData = GLMT.run()
 

@@ -141,7 +141,7 @@ class LLMExecutor:
         raise RuntimeError("After multiple attempts, the LLM request still cannot be successfully executed.")
 
 
-class GLMTree:
+class LMTree:
     def __init__(self,
                  df,
                  target_column_name,
@@ -161,7 +161,7 @@ class GLMTree:
                  max_depth=3,
                  ):
         """
-        Initialize GLMTree model.
+        Initialize LMTree model.
         
         Args:
             df: Input dataframe
