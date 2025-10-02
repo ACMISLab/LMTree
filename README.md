@@ -17,62 +17,64 @@ pip install -r requirements.txt
 
 3. Configure your OpenAI API settings in `LMTree/conf/conf.py`:
 ```python
+import os
+
 # OpenAI API configuration
-os.environ["OPENAI_BASE_URL"] = "https://api.openai-proxy.org/v1"  # 配置API基础URL
-os.environ["OPENAI_API_KEY"] = "your-api-key-here"  # 配置你的API密钥
-model = "gpt-4o-mini"  # 配置使用的模型
+os.environ["OPENAI_BASE_URL"] = "https://api.openai-proxy.org/v1"  # Configure API base URL
+os.environ["OPENAI_API_KEY"] = "your-api-key-here"  # Configure your API key
+model = "gpt-4o-mini"  # Configure the model to use
 ```
 
 ## Quick Start
 
-### 运行示例
+### Running the Example
 
-项目包含一个测试脚本，演示了如何在示例数据集上使用LMTree：
+The project includes a test script that demonstrates how to use LMTree on sample datasets:
 
-1. 首先确保已正确配置 `LMTree/conf/conf.py` 中的API密钥和URL
-2. 直接运行测试脚本：
+1. First, ensure you have properly configured the API key and URL in `LMTree/conf/conf.py`
+2. Run the test script directly:
 
 ```bash
 python test_method.py
 ```
 
-该脚本将在 `data/` 目录中的Australian数据集上运行LMTree。你可以通过修改 `test_method.py` 文件开头的 `dataName` 变量来切换到其他数据集（如 "abalone", "boston" 等）。
+This script will run LMTree on the Australian dataset in the `data/` directory. You can switch to other datasets (such as "abalone", "boston", etc.) by modifying the `dataName` variable at the beginning of the `test_method.py` file.
 
-### 自定义使用
+### Custom Usage
 
-如果要在自己的数据集上使用LMTree，需要准备以下文件：
+To use LMTree on your own dataset, you need to prepare the following files:
 
-1. **CSV数据文件**: 包含特征和目标列的数据
-2. **JSON配置文件**: 包含数据集元信息，格式如下：
+1. **CSV data file**: Contains features and target columns
+2. **JSON configuration file**: Contains dataset metadata in the following format:
 
 ```json
 {
     "dataset_name": "your_dataset_name",
-    "type": true,  // true表示分类任务，false表示回归任务
+    "type": true,  // true for classification tasks, false for regression tasks
     "num_samples": 690,
-    "description": "数据集描述信息",
+    "description": "Dataset description",
     "attribute_introduction": {
-        "feature1": "特征1的描述",
-        "feature2": "特征2的描述"
+        "feature1": "Description of feature 1",
+        "feature2": "Description of feature 2"
     },
     "target": "target_column_name",
-    "is_categorical": [false, true, false]  // 对应每个特征是否为分类特征
+    "is_categorical": [false, true, false]  // Indicates whether each feature is categorical
 }
 ```
 
-然后使用以下代码：
+Then use the following code:
 
 ```python
 import json
 import pandas as pd
 from LMTree.method.LMTree import LMTree
 
-# 加载数据和配置
+# Load data and configuration
 df = pd.read_csv('your_data.csv')
 with open('your_config.json', 'r', encoding='utf-8') as file:
     config = json.load(file)
 
-# 初始化LMTree
+# Initialize LMTree
 lm_tree = LMTree(
     df=df,
     target_column_name=config['target'],
@@ -81,13 +83,13 @@ lm_tree = LMTree(
     is_categorical=config['is_categorical'],
     taskType="classification" if config['type'] else "regression",
     content_desc=config['description'],
-    max_iterations=50,  # 可调整的参数
+    max_iterations=50,  # Adjustable parameter
     max_depth=3
 )
 
-# 运行特征工程
+# Run feature engineering
 result_data = lm_tree.run()
-print("特征工程完成，生成的数据集:", result_data.columns.tolist())
+print("Feature engineering completed, generated dataset:", result_data.columns.tolist())
 ```
 
 ## Features
