@@ -18,7 +18,7 @@ pip install -r requirements.txt
 3. Configure your OpenAI API settings in `LMTree/conf/conf.py`:
 ```python
 # OpenAI API configuration
-os.environ["OPENAI_BASE_URL"] = "https://api.openai-proxy.org/v1"  # Configure API base URL
+os.environ["OPENAI_BASE_URL"] = "https://xxxxxxxxxxxxxxx/v1"  # Configure API base URL
 os.environ["OPENAI_API_KEY"] = "your-api-key-here"  # Configure your API key
 model = "gpt-4o-mini"  # Configure the model to use
 ```
