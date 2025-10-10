@@ -124,7 +124,7 @@ Data = Data.sort_index()
 
 # Initialize and run LMTree
 GLMT = LMTree(Data, target, dataName, attribute_introduction, is_categorical, taskType=taskType,
-               content_desc=description)
+               content_desc=description,random_state=Random_status_list)
 NewData = GLMT.run()
 
 X = NewData.drop(columns=[target])
