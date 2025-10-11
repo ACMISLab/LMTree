@@ -632,8 +632,6 @@ In addition to the original feature attributes of the dataset, the following are
                         con2 += f"{Key}: {Value[0]} # {Value[1]}\n"
 
                     prompt = con2
-                    print(f"qgz_test_content")
-                    print(f"prompt:{prompt}")
                     print(f"Similar characteristics, need to be re-expanded, try {_} times")
 
                     if _ != max_iter_k - 1:
