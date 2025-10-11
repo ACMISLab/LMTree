@@ -577,7 +577,7 @@ In addition to the original feature attributes of the dataset, the following are
         prompt = self.promptBuilde(node, FeatureNameList)
         llm_executor = LLMExecutor()
         tokens_list_temp = [0, 0, 0]
-        isValidationEnabled = False
+        isValidationEnabled = True
         
         for _ in range(max_iter_k):
             try:
