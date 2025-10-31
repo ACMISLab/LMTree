@@ -8,6 +8,9 @@ from sklearn.metrics import accuracy_score, roc_auc_score, r2_score
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier, XGBRegressor
 from GLMTree.LMTree.method.LMTree import LMTree
+import warnings
+
+warnings.filterwarnings("ignore")
 
 dataName = "Australian"  # or "Australian" or "abalone"....
 df = pd.read_csv(os.path.join('data', f'{dataName}.csv'))
