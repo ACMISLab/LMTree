@@ -2,8 +2,8 @@ import os
 import pandas as pd
 
 # OpenAI API configuration
-os.environ["OPENAI_BASE_URL"] = "https://api.openai-proxy.org/v1"
-os.environ["OPENAI_API_KEY"] = "sk-Ef8IbvRhChFvZbQG8WZQUR967z765rzDXSAbskZxtO3k7bfn" #迭代100 1
+os.environ["OPENAI_BASE_URL"] = "https:***********rg/v1"
+os.environ["OPENAI_API_KEY"] = "sk-Ef8***********bfn" #迭代100 1
 model="gpt-4o-mini"  # General conversation model
 
 temperature=1
