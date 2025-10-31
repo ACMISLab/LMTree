@@ -1,17 +1,17 @@
 import json
+import os
+import sys
 
 import numpy as np
 import pandas as pd
 from sklearn.metrics import accuracy_score, roc_auc_score, r2_score
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier, XGBRegressor
+from GLMTree.LMTree.method.LMTree import LMTree
 
-from LMTree.method.LMTree import LMTree
-
-dataName = "Australian" # or "Australian" or "abalone"....
-
-df = pd.read_csv(rf'data/{dataName}.csv')
-file_path = rf'data/{dataName}.json'
+dataName = "Australian"  # or "Australian" or "abalone"....
+df = pd.read_csv(os.path.join('data', f'{dataName}.csv'))
+file_path = os.path.join('data', f'{dataName}.json')
 
 # Load JSON configuration file
 with open(file_path, 'r', encoding='utf-8') as file:
@@ -33,7 +33,7 @@ dataName = dataset_name
 
 def Data_sampling(task_type, X_train, y_train, X_test, y_test, target_name, Num_sample=125, Random_status=42):
     """Data sampling function for both classification and regression tasks."""
-    
+
     def sample_data(data, target_name, num_samples, random_status):
         """Helper function to sample data."""
         sampled_data = data.groupby(target_name).apply(
@@ -53,7 +53,7 @@ def Data_sampling(task_type, X_train, y_train, X_test, y_test, target_name, Num_
         test_data = pd.concat([X_test_sample, y_test_sample], axis=1)
         combined_data = pd.concat([train_data, test_data], axis=0)
         combined_data = combined_data.dropna(axis=1)
-        
+
         train_size = len(train_data)
         X_train = combined_data.iloc[:train_size, :-1]
         y_train = combined_data.iloc[:train_size, -1]
@@ -122,19 +122,25 @@ train, test = train_test_split(df_loaded, test_size=train_test_split_size, rando
 Data = pd.concat([train, test])
 Data = Data.sort_index()
 
-# Initialize and run LMTree
-GLMT = LMTree(Data, target, dataName, attribute_introduction, is_categorical, taskType=taskType,
-               content_desc=description,random_state=Random_status_list)
-NewData = GLMT.run()
+# Run LMTree on TrainValData and transform TestData (see run_LMTree.py)
+GLMT = LMTree(train, target, dataName, attribute_introduction, is_categorical, taskType=taskType,
+              content_desc=description, random_state=seed)
+TrainValData2 = GLMT.run()
 
-X = NewData.drop(columns=[target])
-y = NewData[target]
+# Split training/validation sets
+X_TrainVal = TrainValData2.drop(columns=[target])
+y_TrainVal = TrainValData2[target]
+X_train, X_val, y_train, y_val = train_test_split(X_TrainVal, y_TrainVal, test_size=train_test_split_size,
+                                                  random_state=seed)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_test_split_size, random_state=seed)
-X_train, y_train, X_test, y_test = Data_sampling(type, X_train, y_train, X_test, y_test, target, Num_sample=125,
+# Apply feature transformation to the test set
+X_Test, y_test = GLMT.FeatureTransform(test.drop(columns=[target]), test[target])
+
+# Sample and convert to numeric
+X_train, y_train, X_Test, y_test = Data_sampling(type, X_train, y_train, X_Test, y_test, target, Num_sample=125,
                                                  Random_status=seed)
 X_train = X_train.apply(convert_column)
-X_test = X_test.apply(convert_column)
+X_Test = X_Test.apply(convert_column)
 
 # Initialize ML model
 if taskType == "classification":
@@ -148,7 +154,7 @@ if param_name and param_name in ML_model.get_params():
 
 # Train and evaluate model
 ML_model.fit(X_train, y_train)
-Indicator1, Indicator2 = Experiment_evaluate(ML_model, X_test, y_test, type, X, y)
+Indicator1, Indicator2 = Experiment_evaluate(ML_model, X_Test, y_test, type, X_TrainVal, y_TrainVal)
 
 if type:
     print(f"acc:{Indicator1} auc:{Indicator2}")

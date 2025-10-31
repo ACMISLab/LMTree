@@ -4,9 +4,10 @@ from collections import deque
 
 class FeatureNode:
     """Feature node for the feature construction graph."""
-    def __init__(self, name, expression, depth, explanation_useful, score=0.0, visits_number=0, Q_value=0.0):
+    def __init__(self, name, expression, depth, explanation_useful, score=0.0, visits_number=0, Q_value=0.0, execute_code=None):
         self.name = name
         self.expression = expression
+        self.execute_code = execute_code  # Store the executable Python code
         self.score = score
         self.visits_number = visits_number
         self.Q_value = Q_value  # Q-value for MCTS, different from feature score
@@ -18,8 +19,8 @@ class FeatureGraph:
         self.graph = nx.DiGraph()  # Directed graph
         self.add_feature('root', 'root', -1, explanation_useful="root_useful", score=-1)
 
-    def add_feature(self, name, expression, depth, explanation_useful, score=0.0, visits_number=1, Q_value=0.0):
-        node = FeatureNode(name, expression, depth, explanation_useful, score, visits_number, Q_value)
+    def add_feature(self, name, expression, depth, explanation_useful, score=0.0, visits_number=1, Q_value=0.0, execute_code=None):
+        node = FeatureNode(name, expression, depth, explanation_useful, score, visits_number, Q_value, execute_code)
         self.graph.add_node(name, node=node)
         if depth == 0:  # Original feature node
             self.add_edge('root', name)
