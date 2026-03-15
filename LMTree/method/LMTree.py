@@ -14,7 +14,7 @@ from datetime import datetime
 import warnings
 import os
 
-from ..conf.conf import model, temperature, max_tokens, gamma
+from ..conf.conf import model, temperature, max_tokens,gamma
 from ..llm.run_llm_code import run_llm_code
 from .FeatureGraph import FeatureGraph
 from .FeatureHistoryLibrary import FeatureHistoryLibrary
@@ -27,7 +27,7 @@ class LLMExecutor:
     def __init__(self, max_history_length=5, max_retries=3):
         """
         Initialize LLM executor.
-
+        
         Args:
             max_history_length (int): Maximum conversation history length
             max_retries (int): Maximum retry attempts
@@ -44,8 +44,8 @@ class LLMExecutor:
         try:
             json_patterns = [
                 r'```json\s*([\s\S]*?)```',  # JSON code block
-                r'```\s*([\s\S]*?)```',  # Generic code block
-                r'\[.*?\]',  # JSON array
+                r'```\s*([\s\S]*?)```',     # Generic code block
+                r'\[.*?\]',                 # JSON array
             ]
             for pattern in json_patterns:
                 match = re.search(pattern, message, re.DOTALL | re.IGNORECASE)
@@ -163,7 +163,7 @@ class LMTree:
                  ):
         """
         Initialize LMTree model.
-
+        
         Args:
             df: Input dataframe
             target_column_name: Target column name
@@ -200,8 +200,8 @@ class LMTree:
         self.random_state = random_state
         self.splitSize = splitSize
         self.taskType = taskType
-        self.is_dynamic_uci_C = True  # False—disable dynamic adjustment; True—enable dynamic adjustment
-        self.uci_constant = 1  # UCI exploration constant
+        self.is_dynamic_uci_C = True  # False-禁用动态调整  True-启用动态调整
+        self.uci_constant = 1  # 设置为sqrt(2)
         self.over_uci_cons = 0.05
         self.uci_realTimeGain = (self.uci_constant - self.over_uci_cons) / (self.max_iterations - 1)
         self.DataFullFeatures = self.data
@@ -220,7 +220,7 @@ class LMTree:
                                                                                 test_size=self.splitSize,
                                                                                 random_state=self.random_state)
         self.allTokensLists = [0, 0, 0]  # Store token information: total, input, output
-        self.selfOperatorsLists = []  # Record all operators for the current feature node
+        self.selfOperatorsLists=[] # 记录当前特征节点的所有运算符
 
         self.initialize_feature_scores()
 
@@ -239,7 +239,6 @@ class LMTree:
 
     def calculate_initial_score(self, feature):
         """Calculate initial feature score using multiple metrics."""
-
         def calculate_variance_score(feature):
             return np.var(self.data[feature])
 
@@ -278,7 +277,7 @@ class LMTree:
         model = self.base_evaluator
         model.fit(X_train, y_train)
         pred = model.predict(X_test)
-
+        
         if self.taskType == "classification":
             acc = accuracy_score(y_test, pred)
             pred_proba = model.predict_proba(X_test)
@@ -307,8 +306,8 @@ class LMTree:
                 return relative_mae
 
     def evaluate_feature_set(self, data, pending_feature):
-        # Evaluate feature set
-        yData = data[self.target_column_name]  # Target column
+        # 评估特征集
+        yData = data[self.target_column_name]  #目标列
         xFullData = data.drop(columns=[self.target_column_name])
         xLackData = xFullData.drop(columns=[pending_feature])
 
@@ -316,30 +315,36 @@ class LMTree:
         ScoreLack = self.ScoreModel(xLackData, yData)
         return ScoreFull - ScoreLack
 
-    def uci_formula(self, node, start_node=None):  ###################
-        # Compute UCI value
-        # When computing start_node, it may not have a parent; if so, set start_node=None
+    def uci_formula(self, node, start_node=None):
+        """
+        Calculate UCI value for MCTS.
+        
+        Args:
+            node: The feature node to calculate UCI for
+            start_node: The starting node for the current selection path (optional)
+        """
         if node.depth == -1:  # Root node
             uci = node.score
         else:
-            ##Method 1 for total visits: sum visit counts of all direct parents
+            # Method 1 for total visits: sum visit counts of all direct parents
             # Get all direct parent nodes (not ancestors)
             ParentNodesList = self.GraphData.getParentsList(node.name)
             N_c_total = 0
             for parentName in ParentNodesList:
                 N_c_total += parentName.visits_number
 
-            # ##Method 2 for total visits: only use the parent visits along the path from start_node
-            # Get all direct parent nodes (not ancestors)
             N_j = node.visits_number  # Current node visit count
-            ln_N_c = math.log(N_c_total)  # Compute ln(N_c)
-            fraction = (ln_N_c + 1) / N_j  # Compute (ln(N_c)+1)/N_j
-            exploration_term = math.sqrt(fraction)  # Square root term
-            uci = node.Q_value + self.uci_constant * exploration_term  # Final UCI value: Q + constant * sqrt((ln(N_c)+1)/N_j)
-
+            ln_N_c = math.log(N_c_total)  # Calculate ln(N_C)
+            fraction = (ln_N_c + 1) / N_j  # Calculate (ln(N_C)+1)/N_j
+            exploration_term = math.sqrt(fraction)  # Calculate square root
+            uci = node.Q_value + self.uci_constant * exploration_term  # Final UCI value
+        
         return uci
 
     def select_features(self, StartNodeName):
+        """
+        Select the best feature node using MCTS selection policy.
+        """
         # Get current node
         start_node = self.GraphData.get_node(StartNodeName)
         child_neighbors = self.GraphData.get_neighbors(start_node.name)  # Get all child nodes
@@ -349,25 +354,25 @@ class LMTree:
             return start_node
 
         # Initialize best node and max UCI
+
         best_featureNode = None
         best_uci = -np.inf
 
-        # Iterate children, compute UCI and choose best
+        # 遍历所有孩子节点，计算 UCI 值并找到最优的孩子节点
         for neighbor in child_neighbors:
-            current_uci = self.uci_formula(neighbor, start_node)  # Compute UCI for current child
-            if current_uci > best_uci:  # Update best node and max UCI
+            current_uci = self.uci_formula(neighbor, start_node)  # 计算当前孩子的 UCI 值
+            if current_uci > best_uci:  # 更新最优节点和最大 UCI 值
                 best_uci = current_uci
                 best_featureNode = neighbor
-        # If found best child UCI > current node UCI, continue down
-        if best_uci > self.uci_formula(start_node):  # Compare best child and current node
-            return self.select_features(best_featureNode.name)  # Recursively select next node
-        else:  # Otherwise, return current node
-            return start_node  # Return current node
+        # 如果找到的最佳孩子节点的 UCI 值大于当前节点的 UCI 值，则继续向下选择
+        if best_uci > self.uci_formula(start_node):  # 比较最佳子节点和当前节点
+            return self.select_features(best_featureNode.name)  # 递归选择下一个节点
+        else:# 否则，返回当前节点
+            return start_node  # 返回当前节点
 
     def promptBuilde(self, node, FeatureNameList):
         def contruct_dataBaseInfo():
-            baseInof = (
-                "III. Dataset Information\n    The {dataName} dataset (target variable {targetName}) is a {tasktype} task.")
+            baseInof = ("III. Dataset Information\n    The {dataName} dataset (target variable {targetName}) is a {tasktype} task.")
             tasktype = "regression"
             if self.taskType == "classification":
                 yNum = len(self.Y.unique())
@@ -392,8 +397,8 @@ class LMTree:
                 else:
                     tasktype = "classification"
 
-            CategoricalNum = self.is_categorical[:-1].count(True)  # Number of categorical features
-            ContinuousNu = self.is_categorical[:-1].count(False)  # Number of continuous features
+            CategoricalNum = self.is_categorical[:-1].count(True)  #离散属性个数
+            ContinuousNu = self.is_categorical[:-1].count(False)  #连续属性个数
             if ContinuousNu != 0 and CategoricalNum != 0:
                 con1 = f"The dataset has {CategoricalNum} discrete features and {ContinuousNu} continuous features."
             elif CategoricalNum != 0:
@@ -424,15 +429,15 @@ class LMTree:
             return con
 
         def contruct_GoodFeatures():
-            FResScore = self.FeatureLibrary.extract_feature_scores_dict()  # Historical feature score dictionary
+            FResScore = self.FeatureLibrary.extract_feature_scores_dict()  #历史特征得分字典
             sorted_result_score = dict(sorted(FResScore.items(), key=lambda item: item[1], reverse=True))
-            sorted_featureList = list(sorted_result_score.keys())  # Extract keys after sorting
+            sorted_featureList = list(sorted_result_score.keys())# 提取排序后的所有key值
 
             con = ""
             for featureName in sorted_featureList:
                 NodeObject = self.GraphData.get_node(featureName)
 
-                con += f"{NodeObject.name}:{NodeObject.expression},score:{NodeObject.score:.5f}\n"  # Include feature example and construction expression only
+                con += f"{NodeObject.name}:{NodeObject.expression},score:{NodeObject.score:.5f}\n"  #只需要特征示例和构建表达式
 
             return con
 
@@ -441,7 +446,7 @@ class LMTree:
         Example_Constructed_Features = contruct_GoodFeatures()
 
         part1 = """Objective: Based on the following requirements, dataset information, and DataFrame object df, construct new features {BuildFeatureName}. The new features must be constructed by combining '{selectedFeature}' and expressed in reverse Polish notation (postfix expression) to improve the prediction performance of '{target_name}'. Requirements: When constructing {FeatureNameList_Sample}, the expressions must be simple, involving only 1–3 unary or binary operators, and should prioritize the use of original dataset features; when constructing {FeatureNameList_Complex}, complex expressions involving multi-operator expressions must be designed.
-
+    
 I.Requirements for feature construction
     1. New features must be constructed by combining features selected from the “original feature column” and “feature history library,” and the '{selectedFeature}' feature must be included. Additionally, it is strictly prohibited to fabricate or use other features.
     2. Operator usage: {operator_frequency}
@@ -457,7 +462,7 @@ II.Example Output
     ```json
     {outputExamples}
     ```
-
+    
 """
         part3 = """
 
@@ -472,15 +477,15 @@ In addition to the original feature attributes of the dataset, the following are
 """
         TempPormpt = part1 + DatasetBasicInfo + part3
 
-        # 分别构造两个方向的特征list
-        FeatureNameList_Sample = FeatureNameList[0:len(FeatureNameList) // 2]  # 简单特征list
-        FeatureNameList_Complex = FeatureNameList[len(FeatureNameList) // 2:]  # 复杂特征list
-        FeatureListStr_SampleStr = ""  # 简单特征list 对应字符串 如："feature_0, feature_1"
-        FeatureListStr_ComplexStr = ""  # 复杂特征list 对应字符串 如："feature_2, feature_3"
-        FeatureListStr_SampleStr += ", ".join(FeatureNameList_Sample)  # 如："feature_0, feature_1"
-        FeatureListStr_ComplexStr += ", ".join(FeatureNameList_Complex)  # 如："feature_2, feature_3"
-        FeatureListStr = ""  # 需要构建的特征 List 总的特征list
-        FeatureListStr += ", ".join(FeatureNameList)  # 如："feature_0, feature_1, feature_2"
+        # Construct feature lists for two directions
+        FeatureNameList_Sample = FeatureNameList[0:len(FeatureNameList) // 2]  # Simple feature list
+        FeatureNameList_Complex = FeatureNameList[len(FeatureNameList) // 2:]  # Complex feature list
+        FeatureListStr_SampleStr = ""  # Simple feature list string, e.g., "feature_0, feature_1"
+        FeatureListStr_ComplexStr = ""  # Complex feature list string, e.g., "feature_2, feature_3"
+        FeatureListStr_SampleStr += ", ".join(FeatureNameList_Sample)  # e.g., "feature_0, feature_1"
+        FeatureListStr_ComplexStr += ", ".join(FeatureNameList_Complex)  # e.g., "feature_2, feature_3"
+        FeatureListStr = ""  # Total feature list to construct
+        FeatureListStr += ", ".join(FeatureNameList)  # e.g., "feature_0, feature_1, feature_2"
         outputExamples = self.FeatureLibrary.contruct_outputExamples(FeatureNameList_Sample, FeatureNameList_Complex)
 
         TempPormpt = TempPormpt.format(target_name=self.target_column_name, BuildFeatureName=FeatureListStr,
@@ -516,59 +521,58 @@ In addition to the original feature attributes of the dataset, the following are
 
     @staticmethod
     def detect_and_log_transform(df, column, threshold=1e10, verbose=True):
-        """
-        Detect and handle extreme values and infinite values in columns.
+            """
+            Detect and handle extreme values and infinite values in columns.
 
-        Args:
-            df: DataFrame
-            column: Column name to check
-            threshold: Threshold for "too large" values, default 10^10
-            verbose: Whether to print detailed logs
+            Args:
+                df: DataFrame
+                column: Column name to check
+                threshold: Threshold for "too large" values, default 10^10
+                verbose: Whether to print detailed logs
 
-        Returns:
-            Processed DataFrame
-        """
-        df = df.copy()
+            Returns:
+                Processed DataFrame
+            """
+            df = df.copy()
 
-        if column not in df.columns:
-            if verbose:
-                print(f"Warning: Column {column} does not exist.")
+            if column not in df.columns:
+                if verbose: 
+                    print(f"Warning: Column {column} does not exist.")
+                return df
+
+            try:
+                df[column] = pd.to_numeric(df[column], errors='coerce')
+            except Exception as e:
+                if verbose: 
+                    print(f"Error converting column {column} to numeric type: {e}")
+                return df
+
+            df[column].replace([np.inf, -np.inf], np.nan, inplace=True)
+            df[column].fillna(df[column].median(), inplace=True)
+
+            max_value = df[column].max()
+            min_value = df[column].min()
+
+            if max_value > threshold or abs(min_value) > threshold:
+                if verbose: 
+                    print(f"Detected that column {column} contains excessively large numbers; logarithmic transformation applied.")
+
+                positive_mask = df[column] > 0
+                df.loc[positive_mask, column] = np.log1p(df.loc[positive_mask, column])
+
+                negative_mask = df[column] < 0
+                df.loc[negative_mask, column] = -np.log1p(abs(df.loc[negative_mask, column]))
+
+                if verbose: 
+                    print(f"Column {column} logarithmic transformation completed")
+            else:
+                if verbose: 
+                    print(f"The values in column {column} are within the normal range and do not require any action.")
             return df
-
-        try:
-            df[column] = pd.to_numeric(df[column], errors='coerce')
-        except Exception as e:
-            if verbose:
-                print(f"Error converting column {column} to numeric type: {e}")
-            return df
-
-        df[column].replace([np.inf, -np.inf], np.nan, inplace=True)
-        df[column].fillna(df[column].median(), inplace=True)
-
-        max_value = df[column].max()
-        min_value = df[column].min()
-
-        if max_value > threshold or abs(min_value) > threshold:
-            if verbose:
-                print(
-                    f"Detected that column {column} contains excessively large numbers; logarithmic transformation applied.")
-
-            positive_mask = df[column] > 0
-            df.loc[positive_mask, column] = np.log1p(df.loc[positive_mask, column])
-
-            negative_mask = df[column] < 0
-            df.loc[negative_mask, column] = -np.log1p(abs(df.loc[negative_mask, column]))
-
-            if verbose:
-                print(f"Column {column} logarithmic transformation completed")
-        else:
-            if verbose:
-                print(f"The values in column {column} are within the normal range and do not require any action.")
-        return df
-
     def expand_features(self, node, OrderFeOrigin):
-
+        
         max_iter_k = 3
+        
         beginOrder = OrderFeOrigin * self.num_expand_features * 2
         overOrder = (OrderFeOrigin + 1) * self.num_expand_features * 2
         FeatureNameList = []
@@ -581,7 +585,7 @@ In addition to the original feature attributes of the dataset, the following are
         llm_executor = LLMExecutor()
         tokens_list_temp = [0, 0, 0]
         isValidationEnabled = True
-
+        
         for _ in range(max_iter_k):
             try:
                 ResultList, all_tokens_lists = llm_executor.execute(prompt)
@@ -612,8 +616,7 @@ In addition to the original feature attributes of the dataset, the following are
                 if is_has_selected_feature == False:
                     FeatureListStr = ", ".join(FeatureNameList)
                     prompt = f"""I noticed that the 'execute_code' feature in the previously constructed feature {FeatureListStr} was not synthesized based on the feature '{node.name}'. This is contrary to my requirements, so please reconstruct these features based on '{node.name}'."""
-                    print(
-                        f"The synthetic features do not include the selected features, so the features need to be regenerated. Try {_} times.")
+                    print(f"The synthetic features do not include the selected features, so the features need to be regenerated. Try {_} times.")
 
                     if _ != max_iter_k - 2:
                         tokens_list_temp[0] += all_tokens_lists[0]
@@ -655,7 +658,7 @@ In addition to the original feature attributes of the dataset, the following are
                 CopyData = self.data.copy(deep=True)
                 UseFeatureNodeList = []
                 e_info = ""
-
+                
                 for order, result in enumerate(ResultList):
                     if result["is_useful"]:
                         feature_expression = result['feature_expression']
@@ -667,7 +670,7 @@ In addition to the original feature attributes of the dataset, the following are
                         try:
                             self.DataFullFeatures = run_llm_code(execute_code, self.DataFullFeatures)
                             self.DataFullFeatures = self.detect_and_log_transform(self.DataFullFeatures, featureName,
-                                                                                  verbose=False)
+                                                                             verbose=False)
 
                         except Exception as e:
                             ResultList[order]["is_useful"] = 0
@@ -680,8 +683,7 @@ In addition to the original feature attributes of the dataset, the following are
                         # 更新图结构中的扩展节点。添加节点、边、以及设定参数
                         maxDepth = self.getGraphMaxDepth(feature_expression)
                         fromNodes = self.getFromPointNodes(feature_expression)
-                        self.GraphData.add_feature(featureName, feature_expression, maxDepth + 1, explanation_useful,
-                                                   execute_code=execute_code)
+                        self.GraphData.add_feature(featureName, feature_expression, maxDepth + 1, explanation_useful, execute_code=execute_code)
                         for fromNode in fromNodes:
                             self.GraphData.add_edge(fromNode, featureName)
                         # 需要在扩展节点中 修改UCI值
@@ -702,7 +704,7 @@ In addition to the original feature attributes of the dataset, the following are
             except Exception as e:
                 prompt = f"""You can only select existing features to combine and construct; fictitious features are strictly prohibited! Feature expansion failed, error message:{e}"""
                 print(f"Feature expansion failed, attempted {_} times, error message:{e}")
-
+        
         print(f"Feature Start-{OrderFeOrigin} Extension failed completely")
         return None, None
 
@@ -713,23 +715,24 @@ In addition to the original feature attributes of the dataset, the following are
     def simulate_and_evaluate(self, data, UseFeatureNodeList):
         """Simulate evaluation and calculate feature scores."""
         feature_score_list = []
-
+        
         for Order, FeatureNode in enumerate(UseFeatureNodeList):
             TestData = self.data.copy(deep=True)
             TestData[FeatureNode.name] = data[FeatureNode.name]
             score = self.evaluate_feature_set(TestData, FeatureNode.name)
             feature_record = self.FeatureLibrary.parse_expression(FeatureNode.name, FeatureNode.expression, score,
-                                                                  self.allColumnsLists)
+                                                 self.allColumnsLists)
             self.selfOperatorsLists.append(feature_record['operators'])
             Num_operators = len(feature_record['operators'])
             Num_features = len(feature_record['feature_fields'])
-
-            L_a = gamma * (Num_operators + Num_features)  # 复杂度惩罚项
+            
+            L_a = gamma*(Num_operators + Num_features) # 复杂度惩罚项
             init_Q_value = score - L_a  # Initialize Q value
 
             self.GraphData.update_score(FeatureNode.name, score)
             self.GraphData.update_Q_value(FeatureNode.name, init_Q_value)
             feature_score_list.append(score)
+        print(f"gamma:{gamma}")
         print(f"Feature score gain:{feature_score_list}\n")
 
     def backpropagate(self, UseFeatureNodeList):
@@ -746,8 +749,35 @@ In addition to the original feature attributes of the dataset, the following are
                 current_Q_value = (node.Q_value + childMaxQ_value) * 0.5
                 self.GraphData.update_Q_value(nodeName, current_Q_value)
 
-    def BestFeatureCombination(self):
-        """Select the best feature combination through feature selection."""
+    def _feature_selection_greedy_forward(self, X_base, candidate_features):
+        """
+        Greedy forward feature selection strategy (Wrapper method).
+        Iteratively add features, keep if score improves.
+        """
+        current_X = X_base.copy(deep=True)
+        # Bug fix: Iterate through all candidate features, do not skip the first one
+        # for index, featureName in enumerate(candidate_features):
+        for index, featureName in enumerate(candidate_features[1:]):
+            current_X[featureName] = self.DataFullFeatures[featureName]
+
+            score = self.ScoreModel(current_X, self.Y)
+            # Update best score if improved
+            if score >= self.best_score:
+                self.best_score = score
+                self.best_featureNameList = current_X.columns.tolist()
+                self.FeatureData = current_X  # current_X is the best set in current evolution
+            else:
+                # Undo addition if no improvement
+                del current_X[featureName]
+
+            # Log progress
+            if index % 5 == 0:
+                self.histroy_evaluate_result.append(self.best_score)
+        
+        return current_X
+
+    def BestFeatureCombination(self, selection_strategy='greedy_forward'):
+        """Select best feature combination through feature selection."""
         finallFeatureDict = self.init_column_feature | self.FeatureLibrary.extract_feature_scores_dict()
         sorted_result_score = dict(sorted(finallFeatureDict.items(), key=lambda item: item[1], reverse=True))
         featureList = list(sorted_result_score.keys())
@@ -756,29 +786,31 @@ In addition to the original feature attributes of the dataset, the following are
         XData = self.X.copy(deep=True)
         firstFeatureName = XData.columns.tolist()
 
-        for feature in firstFeatureName:
-            if feature in featureList:
-                featureList.remove(feature)
+        # Remove original features from candidate list to avoid duplicates/errors
+        candidate_features = [f for f in featureList if f not in firstFeatureName]
 
-        # Evaluate each feature to select feature combination
-        for index, featureName in enumerate(featureList[1:]):
-            XData[featureName] = self.DataFullFeatures[featureName]
+        # Apply selection strategy
+        if selection_strategy == 'greedy_forward':
+            # Receive returned final dataset
+            XData = self._feature_selection_greedy_forward(XData, candidate_features)
+        elif selection_strategy == 'none':
+            # No selection: use all generated features
+            print("Selection strategy: None (use all generated features)")
+            for featureName in candidate_features:
+                 XData[featureName] = self.DataFullFeatures[featureName]
+            
+            self.best_score = self.ScoreModel(XData, self.Y)
+            self.best_featureNameList = XData.columns.tolist()
+            self.FeatureData = XData
+            self.histroy_evaluate_result.append(self.best_score)
+        else:
+            print(f"Warning: Unknown selection strategy '{selection_strategy}', defaulting to greedy_forward")
+            # Receive returned final dataset
+            XData = self._feature_selection_greedy_forward(XData, candidate_features)
 
-            score = self.ScoreModel(XData, self.Y)
-            if score >= self.best_score:
-                self.best_score = score
-                self.best_featureNameList = XData.columns.tolist()
-                self.FeatureData = XData
-            else:
-                del XData[featureName]
-
-            if index // 5 == 0:
-                self.histroy_evaluate_result.append(self.best_score)
-
-        # Compare with original column scores and take the better result
+        # Compare with original column score, take better result
         if self.ML_InitScore >= self.best_score:
-            print(
-                f"Instead of the original column score, replace it with the original column {self.ML_InitScore}>{self.best_score}")
+            print(f"Instead of the original column score, replace it with the original column {self.ML_InitScore}>{self.best_score}")
             self.best_score = self.ML_InitScore
             self.best_featureNameList = self.X.columns.tolist()
             self.FeatureData = self.X
@@ -789,7 +821,7 @@ In addition to the original feature attributes of the dataset, the following are
         """Main execution method for iterative feature construction."""
         self.temp_time = 1
         self.histroy_evaluate_result = []
-        self.best_score = 0
+        self.best_score = self.ML_InitScore
         self.best_featureNameList = []
         self.FeatureData = self.X
 
@@ -797,21 +829,44 @@ In addition to the original feature attributes of the dataset, the following are
         for OrderFeOrigin in range(self.max_iterations):
             # Execute four framework steps: selection, expansion, simulation, backpropagation
             selected_featureNode = self.select_features(StartNodeName="root")
-            print(
-                f"##### The {OrderFeOrigin + 1}|{self.max_iterations}th selected base feature: {selected_featureNode.name} #####")
+            print(f"##### The {OrderFeOrigin+1}|{self.max_iterations}th selected base feature: {selected_featureNode.name} #####")
             CopyData, UseFeatureNodeList = self.expand_features(selected_featureNode, OrderFeOrigin)
             if UseFeatureNodeList:
                 self.simulate_and_evaluate(CopyData, UseFeatureNodeList)
                 self.backpropagate(UseFeatureNodeList)
             if self.is_dynamic_uci_C:
                 self.uci_constant -= self.uci_realTimeGain
+            print(f"uci_constant:{self.uci_constant}")
 
         self.BestFeatureCombination()
         self.FeatureData[self.target_column_name] = self.Y
         end_time = time.time()
         self.elapsed_time = end_time - self.initTime
 
+        print(f"Total time spent:{self.elapsed_time:.2f}seconds; Total consumption tokens：{self.allTokensLists[0]}")
+        print(f"Optimal combination of features:{self.best_featureNameList},Best score：{self.best_score}")
         print(f"Feature column:{self.FeatureData.columns.tolist()}")
+
+        for fe in self.best_featureNameList:
+            if "feature" in fe:
+                print(f"    {fe:<10}:{self.GraphData.get_node(fe).expression}")
+
+        from collections import Counter
+        all_operators = [op for sublist in self.selfOperatorsLists for op in sublist]
+        frequency = Counter(all_operators)
+
+        print("运算符频数统计:")
+        print("=" * 30)
+
+        # 按出现次数排序（从高到低）
+        sorted_frequency = frequency.most_common()
+
+        # 格式化输出
+        for i, (operator, count) in enumerate(sorted_frequency, 1):
+            print(f"第{i}种 {operator}：{count}次")
+
+        print("=" * 30)
+        print(f"总计 {len(sorted_frequency)} 种运算符，{len(all_operators)} 次出现")
 
         return self.FeatureData
 
@@ -819,36 +874,37 @@ In addition to the original feature attributes of the dataset, the following are
         """
         Apply the feature transformations learned during training to new data.
         New implementation: Rebuild ALL features from scratch, then select the best ones.
-
+        
         Args:
             X_data (pd.DataFrame): Input features
             y_data (pd.Series): Input target values
-
+            
         Returns:
             tuple: Transformed features and target values
         """
-
+        
         # Create a copy of input data with target column
         data = X_data.copy()
         data[self.target_column_name] = y_data
-
+        
         # Get all nodes from the feature graph, sorted by depth to ensure proper dependency order
         all_nodes = []
         for node_name in self.GraphData.graph.nodes():
             node = self.GraphData.get_node(node_name)
             if node and node.name != "root" and "feature_" in node.name:
                 all_nodes.append(node)
-
+        
         # Sort nodes by depth to ensure dependencies are applied in correct order
         all_nodes.sort(key=lambda x: x.depth)
-
+        
+        
         # Reconstruct ALL features from scratch, starting from the lowest depth
         successfully_applied = set()
         failed_features = set()
-
+        
         for node in all_nodes:
             feature_name = node.name
-
+            
             try:
                 # Use the stored execute_code if available
                 if hasattr(node, 'execute_code') and node.execute_code:
@@ -857,10 +913,11 @@ In addition to the original feature attributes of the dataset, the following are
                     # Fallback: construct execute_code from expression
                     execute_code = f"df['{feature_name}'] = {node.expression}"
 
+                
                 # Apply the transformation using run_llm_code
                 data_before = data.copy()
                 data = run_llm_code(execute_code, data)
-
+                
                 # Verify that the feature was actually created
                 if feature_name in data.columns:
                     # Apply data validation and cleaning after each feature transformation
@@ -870,28 +927,28 @@ In addition to the original feature attributes of the dataset, the following are
                     print(f"  ✗ Feature {feature_name} was not created by execute_code")
                     failed_features.add(feature_name)
                     data = data_before  # Restore previous state
-
+                
             except Exception as e:
                 print(f"  ✗ Error applying feature {feature_name}: {e}")
                 failed_features.add(feature_name)
                 # Continue with next feature without breaking the process
                 continue
-
+        
         if failed_features:
             print(f"  Failed features: {list(failed_features)}")
-
+        
         # Perform final data validation and cleaning for all columns
         for col in data.columns:
             if col != self.target_column_name:
                 data = self.detect_and_log_transform(data, col, verbose=False)
-
+        
         # Now we have a complete dataset with all possible features
         # Select only the features that are in the best feature combination
-
+        
         # Ensure all features from best_featureNameList are present
         missing_features = []
         available_features = []
-
+        
         for feature_name in self.best_featureNameList:
             if feature_name in data.columns:
                 available_features.append(feature_name)
@@ -910,12 +967,13 @@ In addition to the original feature attributes of the dataset, the following are
                         data[feature_name] = 0.0
                         print(f"Warning: Original feature {feature_name} not found, filled with default value 0.0")
                 available_features.append(feature_name)
-
+        
         if missing_features:
             print(f"Filled {len(missing_features)} missing features with default values to ensure consistency")
-
+        
         # Extract the transformed features that match the best feature combination
         X_transformed = data[self.best_featureNameList].copy()
         y_transformed = data[self.target_column_name].copy()
-
+        
+        
         return X_transformed, y_transformed
